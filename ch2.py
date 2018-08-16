@@ -1,3 +1,5 @@
+import numpy as np 
+
 print 'when an image shows up, you will have to dismiss it to continue'
 
 # Import the MNIST data
@@ -38,7 +40,7 @@ digit = train_images[4]
 plt.imshow(digit, cmap=plt.cm.binary)
 plt.show()
 
-print 'Display the fifth train image'
+print 'Display the fifth test image'
 digit = test_images[4]
 plt.imshow(digit, cmap=plt.cm.binary)
 plt.show()
@@ -63,7 +65,7 @@ print 'Categorical done...'
 
 
 
-#importing the data (done via fitting)
+#importing the data (done via fitting) and training the neural network
 print 'Training...'
 myNetwork.fit(train_images, train_labels, epochs=5, batch_size=128)
 print 'Training complete.'
@@ -76,5 +78,20 @@ print 'test_acc:', test_acc
 
 
 
-#next step: call the predict function on a single image, for example the test image in test_images[4]
+print """ Testing some digits """
+
+imageList = np.random.randint(0, 10000, size=(5))		# put 5 random image indices into an array
+
+for anImageIndex in imageList:
+	aTestImage = test_images[anImageIndex]
+	print aTestImage.shape
+	plt.imshow(aTestImage.reshape( (28, 28)), cmap=plt.cm.binary) # reshape like an image
+	plt.show()
+	soloImageArray = np.expand_dims(aTestImage, axis =0) # make the (784,) into (1, 784) expected by model
+	print soloImageArray.shape
+	myNetwork.predict(soloImageArray)				#returns the probabilities for the 10 digits
+	print "***************************** ---> The handwritten digit was a ", np.argmax(myNetwork.predict(soloImageArray))
+
+
+
 
