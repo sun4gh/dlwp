@@ -4,26 +4,15 @@
 #iEpochs = 20
 #print type(iEpochs)
 
-recordHistory = True
-plotHistory = False
-newStats = False
+recordHistory = True			# When calling the models, record the history of each for potential plotting
+plotHistory = False				# Let's be clear if we want the plotting to happen
+newStats = False				# Are we overwriting or appending to the stats file?
 lFields = ["Layer Size", "Batch Size", "Epochs", "Test Data Loss", "Test Data Acc", "\n"]
-statsFile = "metrics.csv"
-hyperParams = "hyperparams.csv"
-
-#This loop shows how I can read the lines in the file for the hyperparameters
-source = open(hyperParams, "r")
-lines = source.readlines()
-for lineNumber in range(len(lines))[1:]:		# skip the first line which has the headers
-	hyperValues = lines[lineNumber].strip('\n').split(',')
-	print(lines[lineNumber].split(','))
-	iMiddleLayerSize = int(hyperValues[0])		
-	iBatchSize=int(hyperValues[1])
-	iEpochs=int(hyperValues[2])
-	print iMiddleLayerSize, iBatchSize, iEpochs
+statsFile = "metrics.csv"		
+hyperParams = "hyperparams.csv"	# where to read the hyperparameters from
 
 
-#Prepare the training data and test data
+#Load the training data and test data
 from keras.datasets import reuters
 (train_data, train_labels) , (test_data, test_labels) = reuters.load_data(num_words=10000)
 
@@ -33,8 +22,7 @@ reverse_word_index = dict ( [ (value, key) for (key, value) in word_index.items(
 decoded_newswire = ' '.join([reverse_word_index.get(i-3, '?') for i in train_data[0]])
 print "example newswire: ", decoded_newswire
 
-
-
+#Transforming the data for our network
 import numpy as np
 
 def vectorize_sequences(sequences, dimension=10000):
@@ -45,7 +33,6 @@ def vectorize_sequences(sequences, dimension=10000):
 
 x_train = vectorize_sequences(train_data)
 x_test = vectorize_sequences(test_data)
-
 
 # one-hot  or categorical encoding.. we could also use the keras built-in to_categorical
 def to_one_hot(labels, dimension=46):			# why are we hardcoding the 46
@@ -59,7 +46,7 @@ one_hot_test_labels = to_one_hot(test_labels)
 
 
 #Prepare a file to be written
-#This needs to be outside the loop chaniging the hyperparameters
+#This needs to be outside the loop changing the hyperparameters
 if newStats == True:
 	f=open(statsFile, "w") 		#create new file
 	f.write(",".join(lFields))		#write the header line
@@ -67,8 +54,23 @@ else:
 	f=open(statsFile, "a")		#append to existing file
 
 
+#This loop reads the hyperparameters from csv file
+#*** currently only remembers the last row, which is what it calls the model on.
+source = open("hyperparams.csv", "r")
+lines = source.readlines()
+for lineNumber in range(len(lines))[1:]:		# skip the first line which has the headers
+	hyperValues = lines[lineNumber].strip('\n').split(',')
+	print(lines[lineNumber].split(','))
+	iMiddleLayerSize = int(hyperValues[0])		
+	iBatchSize=int(hyperValues[1])
+	iEpochs=int(hyperValues[2])
+	print iMiddleLayerSize, iBatchSize, iEpochs
+source.close()
+
+
 from keras import models
 from keras import layers
+
 
 model = models.Sequential()
 model.add(layers.Dense(64, activation='relu', input_shape=(10000,) ))
@@ -136,12 +138,19 @@ if plotHistory == True:
 	plt.show()
 	print"Plotting History... DONE"
 
+
+
+
 print "Evaluating the model using the Keras's test data..."
 
 test_data_loss, test_data_accuracy = model.evaluate(x_test, one_hot_test_labels)			#using the set of keras set of data, returning an unpacked tuple
 print "Test Data Loss: ", test_data_loss
 print "Test Data Acc: ", test_data_accuracy
 print "Evaluating the model DONE."
+
+
+#the following will be outside the loop
+
 
 print "Random Baseline..."
 import copy
