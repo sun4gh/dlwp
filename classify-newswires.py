@@ -1,12 +1,30 @@
-#Parameters to Experiment With
+#We will be reading the 
+#iMiddleLayerSize = 1024
+#iBatchSize = 256
+#iEpochs = 20
+#print type(iEpochs)
 
-iMiddleLayerSize = 4
-iBatchSize = 512
-iEpochs = 20
+recordHistory = True
+plotHistory = False
+newStats = False
+lFields = ["Layer Size", "Batch Size", "Epochs", "Test Data Loss", "Test Data Acc", "\n"]
+statsFile = "metrics.csv"
+hyperParams = "hyperparams.csv"
+
+#This loop shows how I can read the lines in the file for the hyperparameters
+source = open(hyperParams, "r")
+lines = source.readlines()
+for lineNumber in range(len(lines))[1:]:		# skip the first line which has the headers
+	hyperValues = lines[lineNumber].strip('\n').split(',')
+	print(lines[lineNumber].split(','))
+	iMiddleLayerSize = int(hyperValues[0])		
+	iBatchSize=int(hyperValues[1])
+	iEpochs=int(hyperValues[2])
+	print iMiddleLayerSize, iBatchSize, iEpochs
 
 
+#Prepare the training data and test data
 from keras.datasets import reuters
-
 (train_data, train_labels) , (test_data, test_labels) = reuters.load_data(num_words=10000)
 
 #example decoding
@@ -40,6 +58,15 @@ one_hot_train_labels = to_one_hot(train_labels)
 one_hot_test_labels = to_one_hot(test_labels)
 
 
+#Prepare a file to be written
+#This needs to be outside the loop chaniging the hyperparameters
+if newStats == True:
+	f=open(statsFile, "w") 		#create new file
+	f.write(",".join(lFields))		#write the header line
+else:
+	f=open(statsFile, "a")		#append to existing file
+
+
 from keras import models
 from keras import layers
 
@@ -64,12 +91,14 @@ partial_y_train = one_hot_train_labels[1000:]
 print "Fitting the model, while feeding it validation data sliced aside..."
 
 
-plotHistory = True
 
-if plotHistory == True:
+print "Fitting with hyperparams: ", iMiddleLayerSize, iBatchSize, iEpochs
+if recordHistory == True:
+	print ("and recording history")
 	history = model.fit (partial_x_train, partial_y_train, epochs=iEpochs, batch_size=iBatchSize, validation_data = (x_val, y_val))
 else:
-	model.fit(x_train, y_train, epochs=10, batch_size=512, validation_data=(x_val, y_val))
+	print ("without recording history, and using full training data set")
+	model.fit(x_train, y_train, epochs=iEpochs, batch_size=iBatchSize, validation_data=(x_val, y_val))
 	#for both options above, 
 	#without the validation data tuple, the process doesn't self-report on validation on the python sout
 
@@ -128,4 +157,15 @@ predictions = model.predict(x_test)
 print "The shape of an example prediction is a vector for all the topics: ", predictions[0].shape
 print "All predictions add up to one. Example for one data set: ", np.sum(predictions[0])
 
+print "---------------------------------"
+print "layer size : ", iMiddleLayerSize
+print "batch size : ", iBatchSize
+print "epochs : ", iEpochs
+print "Test Data Loss: ", test_data_loss
+print "Test Data Acc: ", test_data_accuracy
+
+#lFields = ["Layer Size", "Batch Size", "Epochs", "Test Data Loss", "Test Data Acc", "\n"]
+lFields=[str(iMiddleLayerSize), str(iBatchSize), str(iEpochs), str(test_data_loss), str(test_data_accuracy), "\n" ]
+f.write(",".join(lFields))
+f.close()
 
