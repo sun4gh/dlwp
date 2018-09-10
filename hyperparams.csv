@@ -1,2 +1,3 @@
 Layer Size, Batch Size, Epochs
 512, 512, 10
+512, 128, 2

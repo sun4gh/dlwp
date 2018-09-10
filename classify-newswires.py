@@ -64,18 +64,6 @@ else:
 	f=open(statsFile, "a")		#append to existing file
 
 
-#This loop reads the hyperparameters from csv file
-# - - - - - - currently only remembers the last row, which is what it calls the model on.
-source = open("hyperparams.csv", "r")
-lines = source.readlines()
-for lineNumber in range(len(lines))[1:]:		# skip the first line which has the headers
-	hyperValues = lines[lineNumber].strip('\n').split(',')
-	print(lines[lineNumber].split(','))
-	iMiddleLayerSize = int(hyperValues[0])		
-	iBatchSize=int(hyperValues[1])
-	iEpochs=int(hyperValues[2])
-	print iMiddleLayerSize, iBatchSize, iEpochs
-source.close()
 
 
 from keras import models
@@ -155,13 +143,23 @@ def recordModelEval(model):
 	#print "Test Data Loss: ", test_data_loss
 	#print "Test Data Acc: ", test_data_accuracy
 
-thisModel , thisHistory = runModel()
-#print "model type: " , type(thisModel)
-#print "history type: ", type(thisHistory)
-recordModelEval(thisModel)
 
-#CLOSE ANY OPEN FILES
+#This loop reads the hyperparameters from csv file
+# - - - - - - currently only remembers the last row, which is what it calls the model on.
+source = open("hyperparams.csv", "r")
+lines = source.readlines()
+for lineNumber in range(len(lines))[1:]:		# skip the first line which has the headers
+	hyperValues = lines[lineNumber].strip('\n').split(',')
+	print(lines[lineNumber].split(','))
+	iMiddleLayerSize = int(hyperValues[0])		
+	iBatchSize=int(hyperValues[1])
+	iEpochs=int(hyperValues[2])
+	print iMiddleLayerSize, iBatchSize, iEpochs
+
+	thisModel , thisHistory = runModel()
+	recordModelEval(thisModel)
 source.close()
+
 f.close()
 
 print "Random Baseline..."
@@ -179,5 +177,4 @@ print "The shape of an example prediction is a vector for all the topics: ", pre
 print "All predictions add up to one. Example for one data set: ", np.sum(predictions[0])
 
 print "---------------------------------"
-
 
