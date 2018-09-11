@@ -1,12 +1,7 @@
-#We will be reading the 
-#iMiddleLayerSize = 1024
-#iBatchSize = 256
-#iEpochs = 20
-#print type(iEpochs)
 
 recordHistory = True			# When calling the models, record the history of each for potential plotting
-plotHistory = False				# Let's be clear if we want the plotting to happen
-newStats = False				# Are we overwriting or appending to the stats file?
+plotHistory = True				# Let's be clear if we want the plotting to happen
+newStats = True				# Are we overwriting or appending to the stats file?
 lFields = ["Layer Size", "Batch Size", "Epochs", "Test Data Loss", "Test Data Acc", "\n"]
 statsFile = "metrics.csv"		
 hyperParams = "hyperparams.csv"	# where to read the hyperparameters from
@@ -96,35 +91,32 @@ def runModel():
 
 
 def displayHistoryGraphs(history):
-	if plotHistory == True:
-		print "Plotting history..."
-		history_dict = history.history
-
-		#get the 4 y-axis values we will plot
-		loss_values= history_dict['loss']
-		val_loss_values = history_dict['val_loss']
-		acc_values=history_dict['acc']
-		val_acc_values=history_dict['val_acc']
-
-		#measure any one of them to get the range of epochs we will plot
-		rEpochs = range(1, len(loss_values) + 1)
-		print "Plotting Training and Validation Loss... (close plot window to continue)"
-		plt.plot(rEpochs, loss_values, 'bo', label='Training loss')
-		plt.plot(rEpochs, val_loss_values, 'b', label='Validation loss')
-		plt.title('Training and validation Loss')
-		plt.xlabel('Epochs')
-		plt.ylabel('Loss')
-		plt.legend()
-		plt.show()
-		print "Plotting Training and Validation Accuracy... (close plot window to continue)"
-		plt.plot(rEpochs, acc_values, 'bo', label='Training Accuracy')
-		plt.plot(rEpochs, val_acc_values, 'b', label='Validation Accuracy')
-		plt.title('Training and validation Accuracy')
-		plt.xlabel('Epochs')
-		plt.ylabel('Accuracy')
-		plt.legend()
-		plt.show()
-		print"Plotting History... DONE"
+	print "Plotting history..."
+	history_dict = history.history
+	#get the 4 y-axis values we will plot
+	loss_values= history_dict['loss']
+	val_loss_values = history_dict['val_loss']
+	acc_values=history_dict['acc']
+	val_acc_values=history_dict['val_acc']
+	#measure any one of them to get the range of epochs we will plot
+	rEpochs = range(1, len(loss_values) + 1)
+	print "Plotting Training and Validation Loss... (close plot window to continue)"
+	plt.plot(rEpochs, loss_values, 'bo', label='Training loss')
+	plt.plot(rEpochs, val_loss_values, 'b', label='Validation loss')
+	plt.title('Training and validation Loss')
+	plt.xlabel('Epochs')
+	plt.ylabel('Loss')
+	plt.legend()
+	plt.show()
+	print "Plotting Training and Validation Accuracy... (close plot window to continue)"
+	plt.plot(rEpochs, acc_values, 'bo', label='Training Accuracy')
+	plt.plot(rEpochs, val_acc_values, 'b', label='Validation Accuracy')
+	plt.title('Training and validation Accuracy')
+	plt.xlabel('Epochs')
+	plt.ylabel('Accuracy')
+	plt.legend()
+	plt.show()
+	print"Plotting History... DONE"
 
 def recordModelEval(model):
 	print "Evaluating the model using the Keras's test data..."
@@ -148,7 +140,11 @@ def recordModelEval(model):
 # - - - - - - currently only remembers the last row, which is what it calls the model on.
 source = open("hyperparams.csv", "r")
 lines = source.readlines()
-for lineNumber in range(len(lines))[1:]:		# skip the first line which has the headers
+print range(len(lines))[1:]
+for lineNumber in range(len(lines))[1:]:		# skip the header line
+	if lines[lineNumber].startswith("#"):
+		print "Skipping...", lines[lineNumber]
+		continue
 	hyperValues = lines[lineNumber].strip('\n').split(',')
 	print(lines[lineNumber].split(','))
 	iMiddleLayerSize = int(hyperValues[0])		
@@ -158,6 +154,8 @@ for lineNumber in range(len(lines))[1:]:		# skip the first line which has the he
 
 	thisModel , thisHistory = runModel()
 	recordModelEval(thisModel)
+	if plotHistory == True:
+		displayHistoryGraphs(thisHistory)
 source.close()
 
 f.close()
