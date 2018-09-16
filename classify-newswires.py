@@ -1,11 +1,13 @@
 
 recordHistory = True			# When calling the models, record the history of each for potential plotting
 plotHistory = True				# Let's be clear if we want the plotting to happen
-newStats = True				# Are we overwriting or appending to the stats file?
+stopPlotFile = "stopplot"		# if this file is encountered during execution, we won't plot the graphs
+newStats = False					# Are we overwriting or appending to the stats file?
 lFields = ["Layer Size", "Batch Size", "Epochs", "Test Data Loss", "Test Data Acc", "\n"]
 statsFile = "metrics.csv"		
 hyperParams = "hyperparams.csv"	# where to read the hyperparameters from
 
+import os.path
 
 #Load the training data and test data
 from keras.datasets import reuters
@@ -154,7 +156,7 @@ for lineNumber in range(len(lines))[1:]:		# skip the header line
 
 	thisModel , thisHistory = runModel()
 	recordModelEval(thisModel)
-	if plotHistory == True:
+	if plotHistory == True and not(os.path.isfile(stopPlotFile)):
 		displayHistoryGraphs(thisHistory)
 source.close()
 
