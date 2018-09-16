@@ -84,11 +84,11 @@ imageList = np.random.randint(0, 10000, size=(5))		# put 5 random image indices 
 
 for anImageIndex in imageList:
 	aTestImage = test_images[anImageIndex]
-	print aTestImage.shape
+	#print aTestImage.shape
 	plt.imshow(aTestImage.reshape( (28, 28)), cmap=plt.cm.binary) # reshape like an image
 	plt.show()
 	soloImageArray = np.expand_dims(aTestImage, axis =0) # make the (784,) into (1, 784) expected by model
-	print soloImageArray.shape
+	#print soloImageArray.shape
 	myNetwork.predict(soloImageArray)				#returns the probabilities for the 10 digits
 	print "***************************** ---> The handwritten digit was a ", np.argmax(myNetwork.predict(soloImageArray))
 
